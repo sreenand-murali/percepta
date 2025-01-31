@@ -101,7 +101,7 @@ def objToHaptic(frame):
                 print(hapticStack[0])
                 GPIO.output(hapticToPin[objects_mapping[hapticStack[0]["name"]]["left"]], GPIO.HIGH)
                 for digit in str(objects_mapping[hapticStack[0]["name"]]["right"]):
-                    GPIO.output(hapticToPin[int(digit)], GPIO.HIGH)
+                    GPIO.output(hapticToPin[int(digit)+5], GPIO.HIGH)
                 hapticStack.pop(0)
                 hapticTime=time.time()
             #//////////////////Outputting/////////////////////////////
