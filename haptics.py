@@ -4,9 +4,18 @@ import logging
 from TimedArray import TimedArray
 import time
 
+import RPi.GPIO as GPIO
+
 
 from variables import objects_mapping,class_labels
 
+HAPTIC_PINS = [4, 5, 6, 12, 13, 16, 17, 18, 19, 20, 21, 26]
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(HAPTIC_PINS, GPIO.OUT)
+
+
+hapticToPin = {1:4,2:5,3:6,4:12,5:13,6:16,7:17,8:18,9:19,10:20,11:21,12:26}
 timed_array = TimedArray(timeout=5)
 hapticStack=[]
 hapticTimer = 2
@@ -29,6 +38,10 @@ def objToHaptic(frame):
     global model  
     global initialSizes
     
+    if(time.time()-hapticTime>=hapticTimer):
+        GPIO.output(HAPTIC_PINS,GPIO.LOW)
+
+
     results = model(frame)
     detections = results[0].boxes.data.cpu().numpy() 
 
@@ -86,6 +99,9 @@ def objToHaptic(frame):
                     hapticStack = sorted(hapticStack, key=lambda x: x["priority"])
             if(hapticStack and time.time()-hapticTime>=hapticTimer):
                 print(hapticStack[0])
+                GPIO.output(hapticToPin[hapticStack[0]["left"]], GPIO.HIGH)
+                for digit in str(hapticStack[0]["right"]):
+                    GPIO.output(hapticToPin[int(digit)], GPIO.HIGH)
                 hapticStack.pop(0)
                 hapticTime=time.time()
             #//////////////////Outputting/////////////////////////////
@@ -119,3 +135,4 @@ while cap.isOpened():
 
 cap.release()
 cv2.destroyAllWindows()
+GPIO.cleanup()
