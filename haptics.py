@@ -96,6 +96,11 @@ def objToHaptic(frame):
                 timed_array.add(obj_class)
                 if(class_labels[obj_class] not in hapticStack):
                     hapticStack.append(class_labels[obj_class])
+                    if(obj_class==0):
+                        emotion_result = DeepFace.analyze(frame, actions=['emotion'],enforce_detection=False, silent=True)
+                        if(emotion_result[0]['dominant_emotion']!="neutral"):
+                            hapticStack.append({ "name":emotion_result[0]['dominant_emotion'], "priority":class_labels[obj_class]["priority"]+0.5 })
+                        
                     hapticStack = sorted(hapticStack, key=lambda x: x["priority"])
             if(hapticStack and time.time()-hapticTime>=hapticTimer):
                 print(hapticStack[0])
