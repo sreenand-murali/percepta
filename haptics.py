@@ -1,6 +1,6 @@
 from ultralytics import YOLO
 import cv2
-# from deepface import DeepFace
+from deepface import DeepFace
 import logging
 from TimedArray import TimedArray
 import time
@@ -9,8 +9,8 @@ import requests
 
 from variables import objects_mapping,class_labels
 
-LEFT_NODEMCU_IP = "http://192.168.20.14"  # Change to actual IP
-# RIGHT_NODEMCU_IP = "http://192.168.1.101"  # Change to actual IP
+LEFT_NODEMCU_IP = "http://192.168.238.142"  # Change to actual IP
+RIGHT_NODEMCU_IP = "http://192.168.238.185"  # Change to actual IP
 
 HAPTIC_PINS = [4, 5, 6, 12, 13, 16, 17, 18, 19, 20, 21, 26]
 
@@ -32,8 +32,9 @@ initialSizes = {}
 
 def send_haptic_signal(left_motor, right_motor):
     try:
-        requests.get(f"{LEFT_NODEMCU_IP}/gpio?command=1{left_motor}")
-        # requests.get(f"{RIGHT_NODEMCU_IP}/gpio?command={right_motor}")
+        pass
+        # requests.get(f"{LEFT_NODEMCU_IP}/gpio?command=1{left_motor}")
+        # requests.get(f"{RIGHT_NODEMCU_IP}/gpio?command=1{right_motor}")
     except Exception as e:
         print("Error sending haptic signal:", e)
 
@@ -86,15 +87,15 @@ def objToHaptic(frame):
                 timed_array.add(obj_class)
                 if(class_labels[obj_class] not in hapticStack):
                     hapticStack.append(class_labels[obj_class])
-                    # if(obj_class==0):
-                    #     emotion_result = DeepFace.analyze(frame, actions=['emotion'],enforce_detection=False, silent=True)
-                    #     if(emotion_result[0]['dominant_emotion']!="neutral"):
-                    #         hapticStack.append({ "name":emotion_result[0]['dominant_emotion'], "priority":class_labels[obj_class]["priority"]+0.5 })
+                    if(obj_class==0):
+                        emotion_result = DeepFace.analyze(frame, actions=['emotion'],enforce_detection=False, silent=True)
+                        if(emotion_result[0]['dominant_emotion']!="neutral"):
+                            hapticStack.append({ "name":emotion_result[0]['dominant_emotion'], "priority":class_labels[obj_class]["priority"]+0.5 })
                     
                     hapticStack = sorted(hapticStack, key=lambda x: x["priority"])
             
             if(hapticStack and time.time()-hapticTime>=hapticTimer):
-                print(hapticStack[0])
+                print(hapticStack)
                 left_motor = objects_mapping[hapticStack[0]["name"]]["left"]
                 right_motor = objects_mapping[hapticStack[0]["name"]]["right"]
                 send_haptic_signal(left_motor, right_motor)
